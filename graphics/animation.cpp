@@ -1,7 +1,5 @@
 #include "animation.hpp"
 
-#include <iostream>
-
 #include "managers/texturemanager.hpp"
 
 namespace graphics {

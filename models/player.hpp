@@ -18,6 +18,9 @@ class Player final : public sf::Drawable
 
     void jump();
 
+    const sf::Vector2f& getPosition() const { return _animation.getPosition(); }
+    uint getWidth() const { return _animation.getWidth(); }
+
   private:
 
     // Player default and starting position

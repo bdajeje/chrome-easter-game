@@ -1,5 +1,5 @@
 #include "map.hpp"
-#include <iostream>
+
 #include "managers/texturemanager.hpp"
 #include "utils/graphics.hpp"
 
@@ -112,6 +112,30 @@ void Map::positionCloud(sf::Sprite& cloud, unsigned int x_offset)
 unsigned int Map::randomTreeHeight()
 {
   return (rand() % 10 >= 5) ? 40 : 30;
+}
+
+bool Map::isTreeBetween(float min, float max) const
+{
+  for( const sf::Sprite& tree : _trees )
+  {
+    const sf::Vector2f& position = tree.getPosition();
+
+    // On the right of the range, so no collision
+    if( position.x > max )
+      continue;
+
+    const sf::FloatRect& bounds = tree.getGlobalBounds();
+
+    // On the left of the range, so no collision
+    const float tree_right_bound = position.x + bounds.width;
+    if( tree_right_bound < min )
+      continue;
+
+    if( position.x >= min || tree_right_bound < max )
+      return true;
+  }
+
+  return false;
 }
 
 }

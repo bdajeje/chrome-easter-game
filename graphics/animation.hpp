@@ -18,6 +18,8 @@ class Animation final : public sf::Drawable
     void update(const sf::Time& elapsed_time);
 
     const sf::Vector2f& getPosition() const { return _sprite.getPosition(); }
+    unsigned int getWidth() const { return _texture_width; }
+
     void setPosition(sf::Vector2f& position) { _sprite.setPosition(position); }
     void setPosition(float x, float y) { _sprite.setPosition(x, y); }
 

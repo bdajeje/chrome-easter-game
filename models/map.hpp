@@ -1,12 +1,10 @@
-#ifndef GAME_HPP
-#define GAME_HPP
+#ifndef MAP_HPP
+#define MAP_HPP
 
 #include <vector>
 #include <list>
 
 #include <SFML/Graphics.hpp>
-
-//#include "utils/forwardlist.hpp"
 
 namespace models {
 
@@ -18,6 +16,8 @@ class Map final : public sf::Drawable
 
     void update(const sf::Time& elapsed_time, uint score);
     void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+
+    bool isTreeBetween(float min, float max) const;
 
   private:
 
@@ -42,4 +42,4 @@ class Map final : public sf::Drawable
 
 }
 
-#endif // GAME_HPP
+#endif // MAP_HPP

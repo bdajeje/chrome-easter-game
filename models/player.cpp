@@ -34,7 +34,7 @@ void Player::update(const sf::Time& elapsed_time)
 
 void Player::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
-  target.draw(_animation);
+  target.draw(_animation, states);
 }
 
 void Player::jump()

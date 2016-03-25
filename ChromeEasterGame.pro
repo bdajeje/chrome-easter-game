@@ -13,7 +13,8 @@ SOURCES += main.cpp \
     utils/directory.cpp \
     utils/timer.cpp \
     graphics/animation.cpp \
-    utils/file.cpp
+    utils/file.cpp \
+    models/game.cpp
 
 LIBS += -lsfml-audio -lsfml-graphics -lsfml-window -lsfml-system \
         -lboost_regex -lboost_filesystem -lboost_system
@@ -28,4 +29,5 @@ HEADERS += \
     utils/directory.hpp \
     utils/timer.hpp \
     graphics/animation.hpp \
-    utils/file.hpp
+    utils/file.hpp \
+    models/game.hpp
