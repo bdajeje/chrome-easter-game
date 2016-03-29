@@ -114,28 +114,43 @@ unsigned int Map::randomTreeHeight()
   return (rand() % 10 >= 5) ? 40 : 30;
 }
 
-bool Map::isTreeBetween(float min, float max) const
+bool Map::isTreeBetween(float player_y, float x_min, float x_max) const
 {
-  for( const sf::Sprite& tree : _trees )
-  {
-    const sf::Vector2f& position = tree.getPosition();
+  if(_trees.empty())
+    return false;
 
-    // On the right of the range, so no collision
-    if( position.x > max )
-      continue;
+  // Only check first tree
+  const sf::Sprite& tree = _trees.front();
+  const sf::Vector2f& position = tree.getPosition();
 
-    const sf::FloatRect& bounds = tree.getGlobalBounds();
+  // If higher than tree, no collision
+  if( player_y < position.y - tree.getGlobalBounds().height )
+    return false;
 
-    // On the left of the range, so no collision
-    const float tree_right_bound = position.x + bounds.width;
-    if( tree_right_bound < min )
-      continue;
+  // On the right of the range, so no collision
+  if( position.x > x_max )
+    return false;
 
-    if( position.x >= min || tree_right_bound < max )
-      return true;
-  }
+  const sf::FloatRect& bounds = tree.getGlobalBounds();
+
+  // On the left of the range, so no collision
+  const float tree_right_bound = position.x + bounds.width;
+  if( tree_right_bound < x_min )
+    return false;
+
+  if( position.x >= x_min || tree_right_bound < x_max )
+    return true;
 
   return false;
+}
+
+void Map::reset()
+{
+  // Remove all trees
+  _trees.clear();
+
+  // Add initial tree
+  generateTree(0);
 }
 
 }

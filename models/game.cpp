@@ -1,21 +1,71 @@
 #include "game.hpp"
 
-#include "utils/timer.hpp"
+#include <iostream>
+
+#include "utils/file.hpp"
 
 namespace models {
 
-Game::Game(sf::RenderWindow& window, sf::Vector2u game_size, uint highest_score)
+const std::string Game::_player_filepath {"player/highest"};
+
+Game::Game(sf::RenderWindow& window, sf::Vector2u game_size)
   : _window {window}
   , _map {game_size.x, game_size.y}
   , _player { sf::Vector2f{Player_x_pos, Player_y_pos} }
-  , _hud {highest_score, game_size.x, game_size.y}
-{}
-
-uint Game::start()
+  , _hud {game_size.x, game_size.y}
 {
-  bool game_started {false};
+  // Read highest score
+  std::string highest_score_str;
+  if( utils::files::read(_player_filepath, highest_score_str) )
+  {
+    try {
+      _highest_score = std::stoul(highest_score_str);
+    }
+    catch(...)
+    {
+      std::cerr << "Wrong player file" << std::endl;
+    }
+  }
+
+  _hud.setHighestScore(_highest_score);
+}
+
+void Game::restart()
+{
+  saveScore();
+
+  _map.reset();
+  _player.reset();
+  _hud.reset();
+
+  _game_started = true;
+  _timer.restart();
+}
+
+void Game::saveScore()
+{
+  const uint score = _hud.getScore();
+  if( score > _highest_score )
+  {
+    _highest_score = score;
+    utils::files::create(_player_filepath, std::to_string(score), true);
+  }
+}
+
+void Game::updatePlayerState()
+{
+  if(!_game_started)
+    return;
+
+  if( sf::Keyboard::isKeyPressed(sf::Keyboard::Down) )
+    _player.standDown();
+  else
+    _player.standUp();
+}
+
+void Game::start()
+{
   const sf::Color background_color {247, 247, 247};
-  utils::time::Timer timer;
 
   while(_window.isOpen())
   {
@@ -29,31 +79,39 @@ uint Game::start()
       {
         case sf::Event::Closed:
         {
-          return _hud.getScore();
+          saveScore();
+          return;
+        }
+        case sf::Event::KeyReleased:
+        {
+          updatePlayerState();
+          break;
         }
         case sf::Event::KeyPressed:
         {
           if(sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
           {
             // Game already started, player jump
-            if(game_started)
+            if(_game_started)
               _player.jump();
             // Start the game
             else
             {
-              game_started = true;
-              timer.start();
+              restart();
               _hud.setDrawStarting(false);
             }
           }
+          else updatePlayerState();
+
+          break;
         }
       }
     }
 
-    if(game_started)
+    if(_game_started)
     {
       // Get elapsed time since last update
-      const sf::Time elapsed_time = timer.restart();
+      const sf::Time elapsed_time = _timer.restart();
 
       // Update models
       _map.update(elapsed_time, _hud.getScore());
@@ -62,10 +120,11 @@ uint Game::start()
 
       // Is there collision
       const sf::Vector2f& position = _player.getPosition();
-      if(_map.isTreeBetween(position.x, position.x + _player.getWidth()))
+      if(_map.isTreeBetween(position.y, position.x, position.x + _player.getWidth()))
       {
-        game_started = false;
+        _game_started = false;
         _hud.setDrawGameOver(true);
+        _hud.setDrawStarting(true);
       }
     }
 
@@ -76,8 +135,6 @@ uint Game::start()
     _window.draw(_hud);
     _window.display();
   }
-
-  return _hud.getScore();
 }
 
 }

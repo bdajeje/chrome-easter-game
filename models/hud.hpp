@@ -9,13 +9,15 @@ class HUD final : public sf::Drawable
 {
   public:
 
-    HUD(unsigned int highest_score, unsigned int window_width, unsigned int window_height);
+    HUD(unsigned int window_width, unsigned int window_height);
 
     void update(const sf::Time& elapsed_time);
     void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+    void reset();
 
     void setDrawStarting(bool value) { _draw_starting = value; }
     void setDrawGameOver(bool value) { _draw_game_over = value; }
+    void setHighestScore(uint value);
 
     uint getScore() const;
 

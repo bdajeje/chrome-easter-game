@@ -15,11 +15,19 @@ class Player final : public sf::Drawable
 
     void update(const sf::Time& elapsed_time);
     void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+    void reset();
 
     void jump();
+    void standUp();
+    void standDown();
 
-    const sf::Vector2f& getPosition() const { return _animation.getPosition(); }
-    uint getWidth() const { return _animation.getWidth(); }
+    const sf::Vector2f& getPosition() const { return _sprite.getPosition(); }
+    uint getWidth() const { return _sprite.getGlobalBounds().width; }
+
+  private:
+
+    void setAnimation(graphics::Animation& animation);
+    bool isJumping() const;
 
   private:
 
@@ -30,10 +38,19 @@ class Player final : public sf::Drawable
     float _target_y_position;
 
     // Player sprite
-    graphics::Animation _animation;
+    sf::Sprite _sprite;
+
+    // Player stands up animation
+    graphics::Animation _animation_up;
+
+    // Player stands down animation
+    graphics::Animation _animation_down;
+
+    // Current animation
+    graphics::Animation* _current_animation {nullptr};
 
     // Pixels / ms
-    float _speed {0.3};
+    float _speed {0.25};
 
     // Jump height
     static constexpr float _jump_height {80};

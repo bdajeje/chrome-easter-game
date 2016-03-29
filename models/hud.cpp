@@ -5,7 +5,7 @@
 
 namespace models {
 
-HUD::HUD( unsigned int highest_score, unsigned int window_width, unsigned int window_height )
+HUD::HUD( unsigned int window_width, unsigned int window_height )
 {
   const sf::Font& font = font::FontManager::get("consolas.ttf");
   const sf::Color color {83, 83, 83};
@@ -15,13 +15,13 @@ HUD::HUD( unsigned int highest_score, unsigned int window_width, unsigned int wi
   _top.setCharacterSize(15);
   _top.setColor(color);
   _top.setString( "Top" );
-  _top.setPosition( window_width - 140, window_height / 10 );
+  _top.setPosition( window_width - 90, window_height / 10 );
 
   // Highest score
   _highest_score.setFont(font);
   _highest_score.setCharacterSize(15);
   _highest_score.setColor(color);
-  _highest_score.setString( scoreString(std::to_string(highest_score)) );
+  setHighestScore(0);
   _highest_score.setPosition( _top.getPosition().x + _top.getGlobalBounds().width + 5, _top.getPosition().y );
 
   // Current score
@@ -29,7 +29,7 @@ HUD::HUD( unsigned int highest_score, unsigned int window_width, unsigned int wi
   _score.setCharacterSize(15);
   _score.setColor(color);
   _score.setString( scoreString("0") );
-  _score.setPosition( _highest_score.getPosition().x + _highest_score.getGlobalBounds().width + 20, _highest_score.getPosition().y );
+  _score.setPosition( _highest_score.getPosition().x, _highest_score.getPosition().y + 20 );
 
   // Starting text
   _starting.setFont(font);
@@ -40,10 +40,15 @@ HUD::HUD( unsigned int highest_score, unsigned int window_width, unsigned int wi
 
   // Game over text
   _game_over.setFont(font);
-  _game_over.setCharacterSize(30);
+  _game_over.setCharacterSize(35);
   _game_over.setColor(color);
-  _game_over.setString("Press 'space' to start");
-  utils::graphics::centerPosition(_game_over, window_width, window_height);
+  _game_over.setString("Game Over");
+  utils::graphics::centerPosition(_game_over, window_width, window_height - 85);
+}
+
+void HUD::setHighestScore(uint value)
+{
+  _highest_score.setString( scoreString(std::to_string(value)) );
 }
 
 void HUD::update(const sf::Time& elapsed_time)
@@ -73,15 +78,15 @@ bool HUD::isSuperior(uint value, const sf::Text& text)
 
 void HUD::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
-  target.draw(_top);
-  target.draw(_highest_score);
-  target.draw(_score);
+  target.draw(_top, states);
+  target.draw(_highest_score, states);
+  target.draw(_score, states);
 
   if(_draw_game_over)
-    target.draw(_game_over);
+    target.draw(_game_over, states);
 
   if(_draw_starting)
-    target.draw(_starting);
+    target.draw(_starting, states);
 }
 
 std::string HUD::scoreString(const std::string& input)
@@ -91,6 +96,14 @@ std::string HUD::scoreString(const std::string& input)
     return input;
 
   return prepend.substr(0, 1 + prepend.length() - input.length()) + input;
+}
+
+void HUD::reset()
+{
+  setDrawGameOver(false);
+  setDrawStarting(true);
+  _elapsed_time = 0;
+  scoreString("0");
 }
 
 }

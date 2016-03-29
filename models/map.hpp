@@ -16,8 +16,9 @@ class Map final : public sf::Drawable
 
     void update(const sf::Time& elapsed_time, uint score);
     void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+    void reset();
 
-    bool isTreeBetween(float min, float max) const;
+    bool isTreeBetween(float player_y, float x_min, float x_max) const;
 
   private:
 
