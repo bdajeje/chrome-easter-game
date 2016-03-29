@@ -2,7 +2,8 @@
 
 #include "managers/texturemanager.hpp"
 #include "utils/graphics.hpp"
-
+#include "utils/random.hpp"
+#include <iostream>
 namespace models {
 
 Map::Map(unsigned int width, unsigned int height, unsigned short nbr_clouds)
@@ -27,8 +28,11 @@ Map::Map(unsigned int width, unsigned int height, unsigned short nbr_clouds)
     positionCloud(_clouds.back(), 0);
   }
 
-  // Create first tree
-  generateTree(0);
+  // Set bird sprite
+  _bird.setTexture( texture::TextureManager::get("bird.png") );
+  _bird.setPosition(0, _height - _bird.getGlobalBounds().height - 30);
+
+  reset();
 }
 
 void Map::update(const sf::Time& elapsed_time, uint score)
@@ -52,8 +56,25 @@ void Map::update(const sf::Time& elapsed_time, uint score)
       positionCloud(cloud, _width);
   }
 
+  // Move bird
+  if( score > _bird_score_limit )
+  {
+     _bird.move(-move * _bird_speed_modificator, 0);
+
+     // Bird goes out of screen, randomly re-place it
+     const static float bird_screen_limit = - _bird.getGlobalBounds().width;
+     if( _bird.getPosition().x < bird_screen_limit )
+       placeBird();
+  }
+  std::cout << _bird.getPosition().x << std::endl;
   // Take care of trees (move and generate)
   updateTrees(move, score);
+}
+
+void Map::placeBird()
+{ std::cout << "place bird !!!!!!!!!!!!!!!1" << std::endl;
+//  _bird.move(_width * utils::random<int>(1, 3), 0);
+  _bird.move(_width, 0);
 }
 
 void Map::updateTrees(float move, uint score)
@@ -99,49 +120,65 @@ void Map::draw(sf::RenderTarget& target, sf::RenderStates states) const
 
   for( const sf::Sprite& tree : _trees )
     target.draw(tree, states);
+
+  target.draw(_bird, states);
 }
 
 void Map::positionCloud(sf::Sprite& cloud, unsigned int x_offset)
 {
   static int max_height = static_cast<int>((_height - _backgrounds[0].getGlobalBounds().height - clouds_margin_bottom) - cloud.getGlobalBounds().height);
-  const int x = rand() % _width * 2;
-  const int y = rand() % max_height;
+  const int x = utils::random<int>(0, _width * 2);
+  const int y = utils::random<int>(0, max_height);
   cloud.setPosition(x + x_offset, y);
 }
 
 unsigned int Map::randomTreeHeight()
-{
-  return (rand() % 10 >= 5) ? 40 : 30;
+{  
+  return (utils::random<int>(0, 10) >= 5) ? 40 : 30;
 }
 
-bool Map::isTreeBetween(float player_y, float x_min, float x_max) const
+bool Map::isCollision(const Player& player) const
 {
-  if(_trees.empty())
-    return false;
+  return isTreeCollision(player) || isBirdCollision(player);
+}
 
-  // Only check first tree
-  const sf::Sprite& tree = _trees.front();
-  const sf::Vector2f& position = tree.getPosition();
-
-  // If higher than tree, no collision
-  if( player_y < position.y - tree.getGlobalBounds().height )
-    return false;
-
+bool Map::isCollide(float a_left, float a_right, float b_left, float b_right)
+{
   // On the right of the range, so no collision
-  if( position.x > x_max )
+  if( a_left > b_right || a_right < b_left )
     return false;
 
-  const sf::FloatRect& bounds = tree.getGlobalBounds();
-
-  // On the left of the range, so no collision
-  const float tree_right_bound = position.x + bounds.width;
-  if( tree_right_bound < x_min )
-    return false;
-
-  if( position.x >= x_min || tree_right_bound < x_max )
+  if( a_right > b_left || a_left < b_right )
     return true;
 
   return false;
+}
+
+bool Map::isTreeCollision(const Player& player) const
+{
+  // Only check first tree
+  const sf::Sprite& tree           = _trees.front();
+  const sf::Vector2f& tree_pos     = tree.getPosition();
+  const sf::Vector2f& player_pos   = player.getPosition();
+  const sf::FloatRect& tree_bounds = tree.getGlobalBounds();
+
+  // If higher than tree, no collision
+  if( player_pos.y < tree_pos.y - tree_bounds.height )
+    return false;
+
+  return isCollide(player_pos.x, player_pos.x + player.getWidth(),
+                   tree_pos.x, tree_pos.x + tree_bounds.width);
+}
+
+bool Map::isBirdCollision(const Player& player) const
+{
+  if(player.isCrouched())
+    return false;
+
+  const sf::Vector2f player_pos = player.getPosition();
+  const sf::Vector2f bird_pos   = _bird.getPosition();
+  return isCollide( player_pos.x, player_pos.x + player.getWidth(),
+                    bird_pos.x, bird_pos.x + _bird.getGlobalBounds().width );
 }
 
 void Map::reset()
@@ -151,6 +188,9 @@ void Map::reset()
 
   // Add initial tree
   generateTree(0);
+
+  // Re-place bird
+  placeBird();
 }
 
 }

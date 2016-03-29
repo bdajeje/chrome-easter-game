@@ -21,6 +21,8 @@ class Player final : public sf::Drawable
     void standUp();
     void standDown();
 
+    bool isCrouched() const { return _current_animation == &_animation_down; }
+
     const sf::Vector2f& getPosition() const { return _sprite.getPosition(); }
     uint getWidth() const { return _sprite.getGlobalBounds().width; }
 

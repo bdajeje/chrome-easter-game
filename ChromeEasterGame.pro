@@ -30,4 +30,5 @@ HEADERS += \
     utils/timer.hpp \
     graphics/animation.hpp \
     utils/file.hpp \
-    models/game.hpp
+    models/game.hpp \
+    utils/random.hpp

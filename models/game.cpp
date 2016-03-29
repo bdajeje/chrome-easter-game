@@ -119,8 +119,7 @@ void Game::start()
       _hud.update(elapsed_time);
 
       // Is there collision
-      const sf::Vector2f& position = _player.getPosition();
-      if(_map.isTreeBetween(position.y, position.x, position.x + _player.getWidth()))
+      if(_map.isCollision(_player))
       {
         _game_started = false;
         _hud.setDrawGameOver(true);

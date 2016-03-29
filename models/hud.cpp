@@ -103,7 +103,7 @@ void HUD::reset()
   setDrawGameOver(false);
   setDrawStarting(true);
   _elapsed_time = 0;
-  scoreString("0");
+  _score.setString( scoreString("0") );
 }
 
 }
